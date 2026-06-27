@@ -1,0 +1,48 @@
+/* c:/Users/USER/Desktop/BagsAndBeyond/client/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #E8738A;
+    --primary-hover: #C4546D;
+    --secondary: #F2B8C2;
+    --background: #FDF6F0;
+    --surface: #FFFFFF;
+    --border: #F5D5DC;
+    --text-primary: #1A1A1A;
+    --text-muted: #7A6E6E;
+    --success: #16A34A;
+    --error: #DC2626;
+  }
+
+  .dark {
+    --primary: #E8738A;
+    --primary-hover: #C4546D;
+    --secondary: #4A3038; /* Based on dark mode border/muted rose context */
+    --background: #1C1C1E;
+    --surface: #2A2A2D;
+    --border: #4A3038;
+    --text-primary: #F5F0EC;
+    --text-muted: #A09A9A;
+    --success: #16A34A;
+    --error: #DC2626;
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased font-sans transition-colors duration-300;
+  }
+}
+
+/* Base resets & scrollbar aesthetics for a premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors;
+}
