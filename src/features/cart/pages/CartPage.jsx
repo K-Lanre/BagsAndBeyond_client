@@ -27,7 +27,12 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    navigate('/checkout', { state: { couponCode: appliedCoupon?.code } });
+    navigate('/checkout', {
+      state: {
+        couponCode: appliedCoupon?.code,
+        appliedCoupon
+      }
+    });
   };
 
   const handleApplyCoupon = (coupon) => {

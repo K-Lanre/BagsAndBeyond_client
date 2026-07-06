@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const [shippingCost, setShippingCost] = useState(0);
   const [isShippingLoading, setIsShippingLoading] = useState(false);
   const isOnline = useOnlineStatus();
+  const appliedCoupon = location.state?.appliedCoupon || null;
 
   const createOrderMutation = useCreateOrder();
   const calculateShippingMutation = useCalculateShipping();
@@ -60,7 +61,16 @@ export default function CheckoutPage() {
 
   const subtotal = getCartTotal();
   const shipping = shippingCost;
-  const total = subtotal + shipping;
+  const discount = appliedCoupon
+    ? appliedCoupon.type === 'percentage'
+      ? (subtotal * parseFloat(appliedCoupon.value || 0)) / 100
+      : appliedCoupon.type === 'flat'
+        ? parseFloat(appliedCoupon.value || 0)
+        : appliedCoupon.type === 'free_shipping'
+          ? shipping
+          : 0
+    : 0;
+  const total = Math.max(0, subtotal + shipping - discount);
   const getCartImage = (item) => getProductImageUrl([item.image]);
 
   useEffect(() => {
@@ -113,6 +123,11 @@ export default function CheckoutPage() {
     const { email, fullName, phoneNumber, streetAddress, country, city, state } = shippingDetails;
     if (!email || !fullName || !phoneNumber || !streetAddress || !country || !city || !state) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (isShippingLoading) {
+      toast.error('Please wait while shipping is being calculated.');
       return;
     }
 
@@ -517,10 +532,15 @@ export default function CheckoutPage() {
 
               <button
                 onClick={handleContinue}
-                disabled={!isOnline || createOrderMutation.isPending || initializePaystackMutation.isPending}
+                disabled={!isOnline || isShippingLoading || createOrderMutation.isPending || initializePaystackMutation.isPending}
                 className="px-8 py-3 bg-primary text-white font-medium rounded-full hover:bg-primary-hover disabled:opacity-70 transition-all flex items-center gap-2"
               >
-                {createOrderMutation.isPending || initializePaystackMutation.isPending ? (
+                {isShippingLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Calculating Shipping...
+                  </>
+                ) : createOrderMutation.isPending || initializePaystackMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Preparing Payment...
@@ -600,6 +620,14 @@ export default function CheckoutPage() {
                     {isShippingLoading ? 'Calculating...' : shipping === 0 ? 'FREE' : `₦${shipping.toLocaleString()}`}
                   </span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">
+                      Discount{appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
+                    </span>
+                    <span className="text-green-600">-â‚¦{discount.toLocaleString()}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-center pt-4 mt-4 border-t border-border">

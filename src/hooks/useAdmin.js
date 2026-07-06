@@ -155,6 +155,21 @@ export const useDeleteProduct = () => {
   });
 };
 
+export const useUpdateProductStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ slug, status }) => {
+      const { data } = await api.patch(`/admin/products/${slug}/status`, { status });
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      updateProductInAdminCaches(queryClient, data.product);
+      invalidateProductDependentAdminQueries(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['product', variables.slug] });
+    },
+  });
+};
+
 // Fetch recent orders
 export const useAdminRecentOrders = (limit = 5) => {
   return useQuery({

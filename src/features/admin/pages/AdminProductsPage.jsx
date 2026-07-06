@@ -2,20 +2,19 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search,
-  Filter,
   Plus,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ArrowUpRight,
   Eye,
-  Trash2,
+  RotateCcw,
   Package,
   Loader2,
   AlertCircle,
-  CheckCircle
+  Power
 } from 'lucide-react';
-import { useAdminProducts, useDeleteProduct, useAdminStats } from '../../../hooks/useAdmin';
+import { useAdminProducts, useDeleteProduct, useAdminStats, useUpdateProductStatus } from '../../../hooks/useAdmin';
 import { useCategories } from '../../../hooks/useProducts';
 import { getProductImageUrl } from '../../../utils/productImages';
 import { useConfirm } from '../../../contexts/ConfirmContext';
@@ -25,7 +24,22 @@ import toast from 'react-hot-toast';
 const statusStyles = {
   active: 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase',
   low_stock: 'bg-orange-100 dark:bg-orange-500/10 text-orange-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase',
-  out_of_stock: 'bg-red-100 dark:bg-red-500/10 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase'
+  out_of_stock: 'bg-red-100 dark:bg-red-500/10 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase',
+  inactive: 'bg-slate-200 dark:bg-slate-500/10 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-[10px] font-bold uppercase'
+};
+
+const getDisplayStatus = (product) => {
+  if (product.status === 'inactive') return 'inactive';
+  if (product.stock_quantity === 0) return 'out_of_stock';
+  if (product.stock_quantity < 10) return 'low_stock';
+  return 'active';
+};
+
+const getStatusLabel = (status) => {
+  if (status === 'inactive') return 'Inactive';
+  if (status === 'out_of_stock') return 'Out of Stock';
+  if (status === 'low_stock') return 'Low Stock';
+  return 'Active';
 };
 
 export default function AdminProductsPage() {
@@ -47,6 +61,7 @@ export default function AdminProductsPage() {
   });
 
   const deleteMutation = useDeleteProduct();
+  const updateStatusMutation = useUpdateProductStatus();
 
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '');
@@ -64,18 +79,41 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (slug) => {
     const confirmed = await confirm({
-      title: 'Delete Product',
-      message: 'This will deactivate the product and remove it from the customer storefront.',
-      confirmText: 'Delete Product'
+      title: 'Clear Product',
+      message: 'This will permanently remove the product from the database. This cannot be undone.',
+      confirmText: 'Clear Product'
     });
 
     if (!confirmed) return;
 
     try {
       await deleteMutation.mutateAsync(slug);
-      toast.success('Product deleted');
+      toast.success('Product permanently deleted');
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to delete product');
+    }
+  };
+
+  const handleToggleStatus = async (product) => {
+    const isInactive = product.status === 'inactive';
+    const confirmed = await confirm({
+      title: isInactive ? 'Reactivate Product' : 'Deactivate Product',
+      message: isInactive
+        ? 'This will make the product visible to customers again.'
+        : 'This will hide the product from the customer storefront while keeping it in admin.',
+      confirmText: isInactive ? 'Reactivate' : 'Deactivate'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await updateStatusMutation.mutateAsync({
+        slug: product.slug,
+        status: isInactive ? 'active' : 'inactive'
+      });
+      toast.success(isInactive ? 'Product reactivated' : 'Product deactivated');
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Failed to update product status');
     }
   };
 
@@ -230,8 +268,8 @@ export default function AdminProductsPage() {
                       <td className="py-4 px-6 text-sm font-bold text-text-primary">₦{parseFloat(product.price).toLocaleString()}</td>
                       <td className="py-4 px-6 text-sm font-bold text-text-primary">{product.stock_quantity}</td>
                       <td className="py-4 px-6">
-                        <span className={statusStyles[product.stock_quantity === 0 ? 'out_of_stock' : product.stock_quantity < 10 ? 'low_stock' : 'active']}>
-                          {product.stock_quantity === 0 ? 'Out of Stock' : product.stock_quantity < 10 ? 'Low Stock' : 'Active'}
+                        <span className={statusStyles[getDisplayStatus(product)]}>
+                          {getStatusLabel(getDisplayStatus(product))}
                         </span>
                       </td>
                       <td className="py-4 px-6">
@@ -242,12 +280,23 @@ export default function AdminProductsPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
-                          {canDeleteProducts && (
+                          <button
+                            onClick={() => handleToggleStatus(product)}
+                            className={`p-2 bg-surface border rounded-lg transition-all shadow-sm ${
+                              product.status === 'inactive'
+                                ? 'border-emerald-200 hover:border-emerald-500/50 text-emerald-600 hover:text-emerald-500'
+                                : 'border-border hover:border-amber-500/50 text-text-muted hover:text-amber-600'
+                            }`}
+                            title={product.status === 'inactive' ? 'Reactivate product' : 'Deactivate product'}
+                          >
+                            {product.status === 'inactive' ? <RotateCcw className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                          </button>
+                          {canDeleteProducts && product.status === 'inactive' && (
                             <button 
                               onClick={() => handleDelete(product.slug)}
-                              className="p-2 bg-surface border border-border rounded-lg hover:border-red-500/50 text-text-muted hover:text-red-500 transition-all shadow-sm"
+                              className="px-3 py-2 bg-surface border border-border rounded-lg hover:border-red-500/50 text-text-muted hover:text-red-500 transition-all shadow-sm text-xs font-bold uppercase"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              Clear
                             </button>
                           )}
                         </div>
