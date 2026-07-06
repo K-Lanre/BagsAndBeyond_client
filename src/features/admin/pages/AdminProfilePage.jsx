@@ -3,6 +3,7 @@ import { Camera, KeyRound, Save, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useChangeAdminPassword, useUpdateAdminProfile, useUploadAdminAvatar } from '../../../hooks/useAdmin';
+import { getApiAssetUrl } from '../../../lib/api';
 
 export default function AdminProfilePage() {
   const { user, login } = useAuth();
@@ -23,9 +24,7 @@ export default function AdminProfilePage() {
 
   const getAvatarSrc = (url) => {
     if (!url) return '';
-    if (/^https?:\/\//i.test(url)) return url;
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    return `${apiBase.replace(/\/api\/?$/, '')}${url}`;
+    return getApiAssetUrl(url);
   };
 
   const handleAvatarUpload = async (e) => {

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
-import { api } from '../../../lib/api';
+import { api, getApiAssetUrl } from '../../../lib/api';
 import { useAdminNotifications, useClearAdminNotifications, useMarkAdminNotificationsRead } from '../../../hooks/useAdmin';
 
 const sidebarItems = [
@@ -109,11 +109,7 @@ export default function AdminLayout() {
   const notifications = notificationData?.notifications || [];
   const unreadCount = notificationData?.unreadCount || 0;
   const initials = (user?.name || user?.email || 'AD').slice(0, 2).toUpperCase();
-  const avatarSrc = user?.avatar_url
-    ? /^https?:\/\//i.test(user.avatar_url)
-      ? user.avatar_url
-      : `${(import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '')}${user.avatar_url}`
-    : '';
+  const avatarSrc = user?.avatar_url ? getApiAssetUrl(user.avatar_url) : '';
 
   const markNotificationsRead = (ids) => {
     if (ids.length === 0) return;
