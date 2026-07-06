@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'bagsandbeyond-v2';
+const CACHE_VERSION = 'bagsandbeyond-v3';
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const APP_SHELL = [
@@ -40,6 +40,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+  const isHttpRequest = url.protocol === 'http:' || url.protocol === 'https:';
+
+  if (!isHttpRequest) {
+    return;
+  }
 
   if (request.method !== 'GET' || isApiRequest(url)) {
     event.respondWith(fetch(request));
