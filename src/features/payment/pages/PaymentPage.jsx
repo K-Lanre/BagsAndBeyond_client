@@ -17,28 +17,6 @@ const paymentMethods = [
       </svg>
     ),
   },
-  {
-    id: 'monnify',
-    name: 'Monnify',
-    description: 'Bank Transfer, Cards',
-    color: '#0066CC',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  {
-    id: 'opay',
-    name: 'OPay',
-    description: 'Wallet, Transfer, Cards',
-    color: '#1B8B3B',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm-1-6h2v-2h-2v2zm0 4h2v-2h-2v2z" />
-      </svg>
-    ),
-  },
 ];
 
 export default function PaymentPage() {
@@ -158,6 +136,10 @@ export default function PaymentPage() {
                 </div>
               </button>
             ))}
+            <div className="rounded-2xl border border-dashed border-border bg-background p-4">
+              <p className="font-medium text-text-primary">Other payment methods</p>
+              <p className="text-xs text-text-muted mt-1">Coming soon.</p>
+            </div>
           </div>
         </div>
 

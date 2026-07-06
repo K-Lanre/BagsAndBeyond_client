@@ -491,21 +491,10 @@ export default function CheckoutPage() {
                     </div>
                   </label>
 
-                  <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${selectedPayment === 'monnify' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
-                    <input type="radio" name="payment" value="monnify" checked={selectedPayment === 'monnify'} onChange={() => setSelectedPayment('monnify')} className="w-4 h-4 text-primary" />
-                    <div className="flex-1">
-                      <p className="font-medium text-text-primary">Monnify</p>
-                      <p className="text-xs text-text-muted">Pay via bank transfer or USSD</p>
-                    </div>
-                  </label>
-
-                  <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${selectedPayment === 'opay' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
-                    <input type="radio" name="payment" value="opay" checked={selectedPayment === 'opay'} onChange={() => setSelectedPayment('opay')} className="w-4 h-4 text-primary" />
-                    <div className="flex-1">
-                      <p className="font-medium text-text-primary">OPay</p>
-                      <p className="text-xs text-text-muted">Pay with your OPay wallet</p>
-                    </div>
-                  </label>
+                  <div className="rounded-xl border border-dashed border-border bg-background px-4 py-4">
+                    <p className="font-medium text-text-primary">Other payment methods</p>
+                    <p className="text-xs text-text-muted mt-1">Coming soon.</p>
+                  </div>
                 </div>
               </div>
             )}
