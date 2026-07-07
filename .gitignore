@@ -1,5 +1,7 @@
 # production
 build/*
+dist/*
+!dist/.gitkeep
 
 # Logs
 logs
