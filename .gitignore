@@ -1,6 +1,5 @@
 # production
 build/*
-dist/*
 
 # Logs
 logs
